@@ -18,7 +18,7 @@ def crawl_comments(stock_code: str):
   last_comment = None
   all_comments = []
 
-  for i in tqdm(range(1000)):
+  for i in tqdm(range(10000)):
     data = {
       "commentId": last_comment,
       "subjectId": stock_code,
@@ -45,12 +45,12 @@ def crawl_comments(stock_code: str):
       
 
   df = pd.DataFrame(all_comments)
-  df.to_csv(stock_code, index=False, encoding="utf-8-sig")
+  df.to_csv(f'{stock_code}.csv', index=False, encoding="utf-8-sig")
   print(f"Saved {len(all_comments)} comments to {stock_code}")
   
 if __name__ == "__main__":
-  TSLA_CODE = 'US20100629001'
+  # TSLA_CODE = 'US20100629001'
   NVIDIA_CODE = 'US19990122001'
   PALANTIR_CODE = 'US20200930014'
 
-  crawl_comments('US20100629001')
+  crawl_comments(NVIDIA_CODE)
