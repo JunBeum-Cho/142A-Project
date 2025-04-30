@@ -18,7 +18,7 @@ def crawl_comments(stock_code: str):
   last_comment = None
   all_comments = []
 
-  for i in tqdm(range(10000)):
+  for cnt in tqdm(range(10000)):
     data = {
       "commentId": last_comment,
       "subjectId": stock_code,
@@ -28,6 +28,10 @@ def crawl_comments(stock_code: str):
 
     response = requests.post(URL, headers=HEADERS,json=data).json()
     comments = response.get('result').get('comments').get('body')
+
+    if len(comments) == 0:
+      break
+
     for c in comments:
       content: str = (c.get('title') or '') + c.get('message')
       updated_at = c.get('updatedAt')
@@ -40,6 +44,7 @@ def crawl_comments(stock_code: str):
         "timestamp": int(datetime.fromisoformat(updated_at).timestamp())
       })
 
+
     last_comment = comments[-1].get('id')
     print(last_comment)
       
@@ -49,8 +54,9 @@ def crawl_comments(stock_code: str):
   print(f"Saved {len(all_comments)} comments to {stock_code}")
   
 if __name__ == "__main__":
-  # TSLA_CODE = 'US20100629001'
-  NVIDIA_CODE = 'US19990122001'
-  PALANTIR_CODE = 'US20200930014'
+  TSLA = 'US20100629001'
+  NVIDIA = 'US19990122001'
+  PALANTIR = 'US20200930014'
+  TQQQ = 'US20100211003'
 
-  crawl_comments(NVIDIA_CODE)
+  # crawl_comments(TQQQ)
