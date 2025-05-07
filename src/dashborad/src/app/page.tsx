@@ -2,7 +2,7 @@
 
 import { Title, Paper, SimpleGrid, Text, Center, Alert, Table, Button } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
-import resultsDataJson from './result.json'; // Import JSON data directly
+import resultsDataJson from '../public/result.json'; // Import JSON data directly
 import './globals.css'; // 이 줄이 있는지 확인
 
 interface ModelResult {
@@ -114,7 +114,7 @@ export default function Home() {
         <div className="text-center font-light text-gray-700 text-[18px]">JunBeum Cho</div>
         <Button 
           component="a"
-          href="/dataset/conversion.csv" // Assuming the file is at public/dataset/conversion.csv
+          href="../public/conversion.csv" // Assuming the file is at public/dataset/conversion.csv
           download="conversion_data.csv" // Suggested filename for download
           variant="light"
           color='dark'
