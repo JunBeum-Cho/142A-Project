@@ -114,7 +114,7 @@ export default function Home() {
         <div className="text-center font-light text-gray-700 text-[18px]">JunBeum Cho</div>
         <Button 
           component="a"
-          href="../public/conversion.csv" // Assuming the file is at public/dataset/conversion.csv
+          href="https://github.com/JunBeum-Cho/142A-Project/raw/refs/heads/main/dataset/conversion.csv" // Assuming the file is at public/dataset/conversion.csv
           download="conversion_data.csv" // Suggested filename for download
           variant="light"
           color='dark'
