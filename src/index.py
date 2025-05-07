@@ -10,6 +10,8 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import roc_curve, confusion_matrix, precision_recall_curve
 import matplotlib.pyplot as plt
+import json
+import os
 
 df = pd.read_csv('dataset/conversion.csv')
 
@@ -255,3 +257,75 @@ if 'y_pred' in locals() and y_test is not None and not X_train_selected.empty:
     plt.show()
 else:
     print("Skipping Confusion Matrix plot: Conditions not met (e.g., y_pred not available or training was skipped).")
+
+# Step 9: Save results to JSON
+print("\n--- Saving results to dataset/result.json ---")
+output_data = {}
+
+# Model Comparison
+if 'results_df' in locals() and isinstance(results_df, pd.DataFrame):
+    output_data["model_comparison"] = results_df.to_dict(orient="records")
+else:
+    output_data["model_comparison"] = []
+
+# Feature Importance
+if 'feature_importance' in locals() and isinstance(feature_importance, pd.DataFrame):
+    output_data["feature_importance"] = feature_importance.to_dict(orient="records")
+else:
+    output_data["feature_importance"] = []
+
+# Data for Optimized RF charts
+if not X_train_selected.empty: # Check if optimized model was trained
+    # ROC Curve data
+    if 'roc_auc_selected' in locals() and 'fpr' in locals() and 'tpr' in locals() and isinstance(fpr, np.ndarray) and isinstance(tpr, np.ndarray):
+        output_data["roc_curve_data"] = {
+            "fpr": fpr.tolist(),
+            "tpr": tpr.tolist(),
+            "auc": roc_auc_selected if 'roc_auc_selected' in locals() else None
+        }
+    
+    # Confusion Matrix data
+    if 'cm' in locals() and isinstance(cm, np.ndarray): # cm is calculated in existing visualization step 4
+        output_data["confusion_matrix_data"] = {
+            "matrix": cm.tolist(),
+            "labels": ["Actual Negative", "Actual Positive"], # Assuming class 0 and 1
+            "predicted_labels": ["Predicted Negative", "Predicted Positive"]
+        }
+
+    # Precision-Recall Curve data
+    if 'precision' in locals() and 'recall' in locals() and isinstance(precision, np.ndarray) and isinstance(recall, np.ndarray): # precision, recall from existing visualization step 5
+        output_data["precision_recall_data"] = {
+            "precision": precision.tolist(),
+            "recall": recall.tolist()
+        }
+
+    # Predicted Probabilities data (raw and for histogram)
+    if 'y_proba' in locals() and isinstance(y_proba, np.ndarray): # y_proba from Step 5
+        output_data["predicted_probabilities_data"] = {
+            "raw_probabilities": y_proba.tolist()
+        }
+        # Calculate histogram data
+        hist_counts, bin_edges = np.histogram(y_proba, bins=10) # 10 bins
+        output_data["probability_histogram_data"] = {
+            "counts": hist_counts.tolist(),
+            "bin_edges": bin_edges.tolist() 
+            # For plotting, bin labels can be like f"{bin_edges[i]:.2f}-{bin_edges[i+1]:.2f}"
+        }
+else:
+    print("Optimized model training was skipped, so detailed chart data for it will not be saved.")
+
+
+# Ensure output directory exists
+# Save into src/dashborad/src/app/ for direct import by page.tsx
+# This assumes src/index.py is in project_root/src/ and dashboard is project_root/src/dashborad/
+output_dir = os.path.join(os.path.dirname(__file__), "..", "src", "dashborad", "src", "app")
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+output_path = os.path.join(output_dir, "result.json")
+try:
+    with open(output_path, 'w') as f:
+        json.dump(output_data, f, indent=4)
+    print(f"Results successfully saved to {output_path}")
+except Exception as e:
+    print(f"Error saving results to JSON: {e}")
